@@ -7,5 +7,5 @@ Check it out: [https://www.mattdaly.org/projects/rainbowtable.html](https://www.
 ## Features:
 
 - Intuitive interface for easy exploration of hash functions.
-- Color-coded visualization of input values and hash outputs.
+- Color-coded visualization of hash outputs.
 - Zoom feature to expand view.
