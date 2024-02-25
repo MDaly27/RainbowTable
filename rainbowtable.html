@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Hash Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Hide vertical scrollbar */
+            margin: 0;
+            padding: 0;
+            background-color: #1f1f1f; /* Dark background */
+            color: #ffffff; /* White text */
+        }
+        #container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 20px;
+        }
+        #title {
+            font-size: 32px; /* Larger title size */
+            margin-bottom: 20px;
+        }
+        #tableDescription {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #buttonContainer {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            width: 50px; /* Adjusted width */
+            padding: 12px; /* Larger padding */
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            text-align: center; /* Center text */
+            margin-right: 10px; /* Add right margin */
+        }
+        input[type="number"]::placeholder {
+            color: #aaaaaa; /* Lighter placeholder text */
+        }
+        button {
+            padding: 12px 24px; /* Larger padding */
+            background-color: #4e8cff; /* Cool blue color */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px; /* Add right margin */
+        }
+        button:last-child {
+            margin-right: 0; /* Remove margin from the last button */
+        }
+        button:hover {
+            background-color: #3a6eb5; /* Darker blue on hover */
+        }
+        button.zoom-on {
+            background-color: white; /* White when zoom is on */
+            color: #4e8cff; /* Cool blue text color */
+        }
+        #instruction {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #aaaaaa; /* Lighter text color */
+        }
+        #tableContainer {
+            overflow-y: auto; /* Enable vertical scrollbar */
+            width: 80%; /* Set a fixed width for the container */
+            max-height: calc(100vh - 250px); /* Adjust max-height based on other elements */
+            position: relative;
+        }
+        table {
+            width: 100%; /* Take full width of the container */
+            border-collapse: collapse;
+            font-weight: bold; /* Make table text bold */
+        }
+        th, td {
+            border: 1px solid #333333; /* Darker border color */
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #333333; /* Darker header background */
+        }
+        tr:nth-child(even) {
+            background-color: #333333; /* Darker even row background */
+        }
+        .password-column, .encryption-column {
+            width: 50%; /* Set equal width for both columns */
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div id="title">Password Hash Generator</div>
+        <div id="buttonContainer">
+            <input type="number" id="passwordCount" value="4" placeholder="4" onkeydown="handleEnter(event)">
+            <button onclick="generatePasswords()">Generate Passwords</button>
+            <button id="toggleZoomButton" class="toggle" onclick="toggleZoom()">Toggle Zoom</button>
+        </div>
+        <div id="tableDescription">The table below shows the generated passwords along with their corresponding hash values.</div>
+        <div id="tableContainer" onwheel="handleWheel(event)">
+            <table id="passwordTable">
+                <thead>
+                    <tr>
+                        <th class="password-column">Password</th>
+                        <th class="encryption-column">Encryption</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="instruction">To enable zoom, click the "Toggle Zoom" button and scroll using your mouse wheel.</div>
+    </div>
+
+    <script>
+        var zoomEnabled = false;
+        var zoomLevel = 1;
+
+        // Initial generation of passwords
+        generatePasswords();
+
+        function generatePasswords() {
+            var passwordCount = document.getElementById("passwordCount").value;
+            var passwordTable = document.getElementById("passwordTable").getElementsByTagName("tbody")[0];
+            passwordTable.innerHTML = "";
+
+            for (var i = 0; i < passwordCount; i++) {
+                var password = String.fromCharCode(97 + i);
+                var hash = generateHash(password);
+                var color = generateNeonColor(hash); // Use neon color function
+
+                var tr = document.createElement("tr");
+                var td1 = document.createElement("td");
+                td1.textContent = password;
+                var td2 = document.createElement("td");
+                td2.textContent = hash;
+                td2.style.backgroundColor = color;
+
+                // Set text color for hash section based on background highlight
+                var textColor = getTextColor(color);
+                td2.style.color = textColor;
+
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                passwordTable.appendChild(tr);
+            }
+        }
+
+        function generateHash(password) {
+            // Use SHA-256 hashing algorithm from CryptoJS library
+            var hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+            return hash;
+        }
+
+        function generateNeonColor(hash) {
+            // Generate neon color from hash value
+            var r = parseInt(hash.substring(0, 2), 16);
+            var g = parseInt(hash.substring(2, 4), 16);
+            var b = parseInt(hash.substring(4, 6), 16);
+
+            // Adjust color components to make it brighter
+            var neonR = Math.min(255, r * 2);
+            var neonG = Math.min(255, g * 2);
+            var neonB = Math.min(255, b * 2);
+
+            // Convert RGB to hex format
+            var hexColor = "#" + (neonR.toString(16)).padStart(2, '0') + (neonG.toString(16)).padStart(2, '0') + (neonB.toString(16)).padStart(2, '0');
+
+            return hexColor;
+        }
+
+        function handleWheel(event) {
+            if (zoomEnabled) {
+                event.preventDefault();
+
+                var delta = Math.sign(event.deltaY) * 1.5; // Adjust scroll sensitivity
+                zoomLevel -= delta * 0.05;
+                zoomLevel = Math.min(Math.max(0.1, zoomLevel), 4);
+                var fontSize = 16 * zoomLevel; // Adjust font size based on zoom level
+                document.getElementById("passwordTable").style.fontSize = fontSize + "px";
+            }
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                generatePasswords();
+            }
+        }
+
+        function toggleZoom() {
+            zoomEnabled = !zoomEnabled;
+            var toggleZoomButton = document.getElementById("toggleZoomButton");
+            toggleZoomButton.classList.toggle("zoom-on", zoomEnabled);
+        }
+
+        function getTextColor(backgroundColor) {
+            // Calculate the contrast ratio between text color and background color
+            var color = backgroundColor.substring(1); // Remove # symbol
+            var r = parseInt(color.substr(0, 2), 16); // Convert to decimal
+            var g = parseInt(color.substr(2, 2), 16);
+            var b = parseInt(color.substr(4, 2), 16);
+            var brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000; // Calculate brightness
+
+            // Return white or black based on brightness
+            return brightness > 125 ? '#000000' : '#ffffff';
+        }
+    </script>
+</body>
+</html>
