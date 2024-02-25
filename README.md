@@ -2,7 +2,7 @@
 
 Online visualization tool which color codes hash outputs for a selected number of inputs.
 
-Run it online: [https://www.mattdaly.org/projects/rainbowtable.html](https://www.mattdaly.org/projects/rainbowtable.html)
+Check it out: [https://www.mattdaly.org/projects/rainbowtable.html](https://www.mattdaly.org/projects/rainbowtable.html)
 
 ## Features:
 
